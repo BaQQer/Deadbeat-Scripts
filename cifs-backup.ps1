@@ -38,6 +38,9 @@ get-content "$backupList" | ForEach-Object {
     }else {
         $subDir = "unknown_host"
     }
+    if (-not (test-path -path $destination/$subDir -PathType Container)) {
+        New-Item $destination/$subDir -ItemType Directory | Out-Null
+    }
     logger "Started copy of $_ to $destination/$subDir"
     robocopy "$_" "$destination/$subDir" /e /copy:DAT /dcopy:DAT /r:0 /w:0 /zb /xd "*#recycle*" @verboseOptions
     if ($LASTEXITCODE -gt 6){
