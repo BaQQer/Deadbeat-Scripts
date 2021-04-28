@@ -34,15 +34,18 @@ if (-not (test-path -path $destination -PathType Container)) {
 get-content "$backupList" | ForEach-Object {
     $pathInfo = [System.Uri]$_
     if ($pathInfo.isUnc){
-        $subDir = $(($pathInfo.Host))
+        $srchost = $(($pathInfo.Host))
     }else {
-        $subDir = "unknown_host"
+        $srchost = "unknown_host"
     }
+    $pathBasename = (get-item -Path $_).basename
+    $destDir = "$destination/$srchost/$pathBasename"
     if (-not (test-path -path $destination/$subDir -PathType Container)) {
         New-Item $destination/$subDir -ItemType Directory | Out-Null
     }
-    logger "Started copy of $_ to $destination/$subDir"
-    robocopy "$_" "$destination/$subDir" /e /copy:DAT /dcopy:DAT /r:0 /w:0 /zb /xd "*#recycle*" @verboseOptions
+    write-host $destDir
+    logger "Started copy of $_ to $destDir"
+    robocopy "$_" "$destDir" /e /copy:DAT /dcopy:DAT /r:0 /w:0 /zb /xd "*#recycle*" @verboseOptions
     if ($LASTEXITCODE -gt 6){
         logger "Copy of $_ finished with exit code $LASTEXITCODE. Run script with -logToConsole to debug."
     }else{
